@@ -1,3 +1,11 @@
+# Node-ws
+基于serverless实现的vless+trojan双协议代理,轻量，无内核。
+
+##   https://web.freecloud.ltd
+
+##   https://panel.freecloud.ltd
+
+
 * PaaS 平台设置的环境变量
   | 变量名        | 是否必须 | 默认值 | 备注 |
   | ------------ | ------ | ------ | ------ |
@@ -12,3 +20,26 @@
   | AUTO_ACCESS  | 否 |  false | 是否开启自动访问保活,false为关闭,true为开启,需同时填写DOMAIN变量 |
 
 * 域名/${SUB_APTH}查看节点信息，非标端口，域名:端口/${SUB_APTH}  SUB_APTH为自行设置的订阅token，未设置默认为sub
+
+### 使用cloudflare workers 或 snippets 反代域名给节点套cdn加速
+```
+export default {
+    async fetch(request, env) {
+        let url = new URL(request.url);
+        if (url.pathname.startsWith('/')) {
+            var arrStr = [
+                'change.your.domain', // 此处单引号里填写你的节点伪装域名
+            ];
+            url.protocol = 'https:'
+            url.hostname = getRandomArray(arrStr)
+            let new_request = new Request(url, request);
+            return fetch(new_request);
+        }
+        return env.ASSETS.fetch(request);
+    },
+};
+function getRandomArray(array) {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
+}
+```
